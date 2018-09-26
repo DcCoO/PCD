@@ -8,9 +8,13 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.rmi.Naming;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 public class ClientRequestHandler {
+	
+	static long start, end;
+	
 	Protocol protocol = Config.protocol;
 	
 	int SendRequest(Client c, String args) throws IOException {
@@ -43,18 +47,25 @@ public class ClientRequestHandler {
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, porta);
 
 		clientSocket.send(sendPacket);
+		
+		Config.log("CLIENT REQUEST HANDLER: sending client " + c + " request.");
 
 		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
 		clientSocket.receive(receivePacket);
-		//System.out.println("Pacote UDP recebido!");
 
 		String equationAnswer = new String(receivePacket.getData());
 
+		int lastIndex = 0;
+		for(char ch = '0'; ch <= '9'; ch++) {
+			lastIndex = Math.max(lastIndex, equationAnswer.lastIndexOf(ch) + 1);
+		}
+
+		equationAnswer = equationAnswer.substring(0, lastIndex);
 		clientSocket.close();
 
-		System.out.println("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
-
+		Config.log("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
+		
 		return Integer.parseInt(equationAnswer);
 	}
 	
@@ -71,10 +82,10 @@ public class ClientRequestHandler {
 		
 		outToServer.writeBytes(args + '\n');
 		
-		System.out.println("CLIENT REQUEST HANDLER: sending client " + c + " request.");
+		Config.log("CLIENT REQUEST HANDLER: sending client " + c + " request.");
 		
 		equationAnswer = inFromServer.readLine();
-		System.out.println("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
+		Config.log("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
 		
 		clientSocket.close();
 
@@ -85,7 +96,7 @@ public class ClientRequestHandler {
 		try {
 			Solver solver = (Solver) Naming.lookup("rmi://localhost:1099/EquationService");
 			int equationAnswer = solver.Solve(args);
-			System.out.println("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
+			Config.log("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
 			return equationAnswer;
 		}
 		catch(Exception e) {
@@ -98,14 +109,23 @@ public class ClientRequestHandler {
 	
 	public static void main(String[] args) throws InterruptedException, IOException {
 		
+		long total = 0;
+		int it = 50000;
 		ClientRequestHandler crh = new ClientRequestHandler();
-		for(int i = 0; i < 3; i++) {
+		for(int i = 0; i < it; i++) {
 			Client client = new Client(crh);
+			start = System.nanoTime();
 			client.Solve();
+			end = System.nanoTime();
+			total += (end - start);
 			client.Thank();
-			TimeUnit.SECONDS.sleep(1);
-			System.out.println();
+			TimeUnit.MILLISECONDS.sleep(100);
+			Config.log("");
+			//System.out.println(i);
 		}
+		
+		System.out.println("TOTAL = " + (total / 1000000));
+		System.out.println("Media = " + ((double) total / 1000000) / it);
 	}
 	
 	
