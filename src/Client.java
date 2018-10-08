@@ -16,10 +16,15 @@ public class Client{
 		ID = UUID.randomUUID().toString().substring(0, 4);
 		this.CRH = crh;
 		
+		/*
 		java.util.Random r = new java.util.Random();
 		var = 1 + r.nextInt(5);
 		coef = new int[1 + r.nextInt(4)];
-		for(int i = 0; i < coef.length; i++) coef[i] = r.nextInt(6);
+		for(int i = 0; i < coef.length; i++) coef[i] = r.nextInt(6);*/
+		
+		var = 3;
+		coef = new int[3];
+		coef[0] = 1; coef[1] = 2; coef[2] = 3;
 	}
 	
 	String equation() {
@@ -36,17 +41,18 @@ public class Client{
 		for(int i = 0; i < coef.length; i++) {
 			s += coef[i] + " ";
 		}
-		return s + var;
+		String args = s + var;
+		return args;
 	}
 
 	public int Solve() throws IOException {
-		System.out.println(ID + ": can you solve " + equation() + " for me?");
+		Config.log(ID + ": can you solve " + equation() + " for me?");
 		answer = CRH.SendRequest(this, GetArgs());
 		return answer;
 	}
 	
 	public void Thank() {
-		System.out.println(ID + ": thank you for answering " + answer + " for me!");
+		Config.log(ID + ": thank you for answering " + answer + " for me!");
 	}
 	
 	public String toString() {
