@@ -16,9 +16,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 
 public class ServerRequestHandler {
-	
+	static ServerRequestHandler instance;
 	ServerRequestHandler(){
-		
+		instance = this;
 	}
 	
 	void StartServer() throws AlreadyBoundException, IOException{
@@ -85,6 +85,18 @@ public class ServerRequestHandler {
 		}
 		System.out.println();
 		
+	}
+	
+	int CallEquationService(String args) {
+		try {
+			Solver solver = (Solver) Naming.lookup("rmi://localhost:1099/EquationService");
+			int equationAnswer = solver.Solve(args);
+			return equationAnswer;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 	
 	public static void main(String[] args) throws AlreadyBoundException, IOException {

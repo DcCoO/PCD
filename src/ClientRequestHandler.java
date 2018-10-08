@@ -93,16 +93,9 @@ public class ClientRequestHandler {
 	}
 	
 	int MW_Request(Client c, String args) {
-		try {
-			Solver solver = (Solver) Naming.lookup("rmi://localhost:1099/EquationService");
-			int equationAnswer = solver.Solve(args);
-			Config.log("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
-			return equationAnswer;
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-		return -1;
+		int equationAnswer = ServerRequestHandler.instance.CallEquationService(args);
+		System.out.println("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
+		return equationAnswer;
 	}
 	
 	
