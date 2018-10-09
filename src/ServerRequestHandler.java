@@ -17,8 +17,11 @@ import java.rmi.registry.LocateRegistry;
 
 public class ServerRequestHandler {
 	static ServerRequestHandler instance;
-	ServerRequestHandler(){
-		instance = this;
+	private ServerRequestHandler(){}
+	
+	static ServerRequestHandler GetInstance() {
+		if(instance == null) instance = new ServerRequestHandler();
+		return instance;
 	}
 	
 	void StartServer() throws AlreadyBoundException, IOException{
@@ -82,20 +85,38 @@ public class ServerRequestHandler {
 			Naming.bind("EquationService", (Remote) s);
 			Config.log("SERVER REQUEST HANDLER: server opened.");
 			break;
+			
+		case MRMI:
+			MyRMI.GetInstance().register(new EquationService(), "EquationService");
+			Config.log("SERVER REQUEST HANDLER: server opened.");
+			break;
 		}
 		System.out.println();
 		
 	}
 	
 	int CallEquationService(String args) {
-		try {
-			Solver solver = (Solver) Naming.lookup("rmi://localhost:1099/EquationService");
-			int equationAnswer = solver.Solve(args);
-			return equationAnswer;
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		switch (Config.protocol) {
+			case MW:
+				try {
+					Solver solver = (Solver) Naming.lookup("rmi://localhost:1099/EquationService");
+					int equationAnswer = solver.Solve(args);
+					return equationAnswer;
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+				}
+				break;
+				
+			case MRMI:
+				try {
+					Solver solver = (Solver) MyRMI.GetInstance().retrieve("EquationService");
+					return solver.Solve(args);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+				break;
+		}		
 		return -1;
 	}
 	

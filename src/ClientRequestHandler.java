@@ -26,6 +26,8 @@ public class ClientRequestHandler {
 			return TCP_Request(c, args);
 		case MW:
 			return MW_Request(c, args);
+		case MRMI:
+			return MRMI_Request(c, args);
 		}
 		return -1;
 	}
@@ -93,7 +95,13 @@ public class ClientRequestHandler {
 	}
 	
 	int MW_Request(Client c, String args) {
-		int equationAnswer = ServerRequestHandler.instance.CallEquationService(args);
+		int equationAnswer = ServerRequestHandler.GetInstance().CallEquationService(args);
+		System.out.println("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
+		return equationAnswer;
+	}
+	
+	int MRMI_Request(Client c, String args) {
+		int equationAnswer = ServerRequestHandler.GetInstance().CallEquationService(args);
 		System.out.println("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
 		return equationAnswer;
 	}

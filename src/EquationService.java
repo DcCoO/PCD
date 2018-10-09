@@ -1,9 +1,10 @@
 import java.rmi.RemoteException;
+import java.io.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class EquationService extends UnicastRemoteObject implements Solver{
+public class EquationService extends UnicastRemoteObject implements Solver, Serializable{
 	
 	private static final long serialVersionUID = 1L;
 
@@ -34,5 +35,13 @@ public class EquationService extends UnicastRemoteObject implements Solver{
 		}
 		in.close();
 		return resp;
+	}
+	
+	public void Serialize(String name) throws IOException {
+		FileOutputStream fileOut = new FileOutputStream(name + ".txt");
+		ObjectOutputStream out = new ObjectOutputStream(fileOut);
+		out.writeObject(this);
+		out.close();
+		fileOut.close();
 	}
 }
