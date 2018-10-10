@@ -17,6 +17,15 @@ public class ClientRequestHandler {
 	
 	Protocol protocol = Config.protocol;
 	
+	static ClientRequestHandler instance = null;
+	
+	
+	
+	static ClientRequestHandler GetInstance() {
+		if(instance == null) instance = new ClientRequestHandler();
+		return instance;
+	}
+	
 	int SendRequest(Client c, String args) throws IOException {
 		
 		switch(protocol) {
@@ -94,16 +103,50 @@ public class ClientRequestHandler {
 		return Integer.parseInt(equationAnswer);
 	}
 	
-	int MW_Request(Client c, String args) {
-		int equationAnswer = ServerRequestHandler.GetInstance().CallEquationService(args);
-		System.out.println("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
-		return equationAnswer;
+	int MW_Request(Client c, String args) throws UnknownHostException, IOException {
+		String equationAnswer;
+
+		int porta = 5000;
+		String servidor = "localhost";
+
+		Socket clientSocket = new Socket(servidor, porta);
+		
+		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		
+		outToServer.writeBytes(args + '\n');
+		
+		Config.log("CLIENT REQUEST HANDLER: sending client " + c + " request.");
+		
+		equationAnswer = inFromServer.readLine();
+		Config.log("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
+		
+		clientSocket.close();
+
+		return Integer.parseInt(equationAnswer);
 	}
 	
-	int MRMI_Request(Client c, String args) {
-		int equationAnswer = ServerRequestHandler.GetInstance().CallEquationService(args);
-		System.out.println("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
-		return equationAnswer;
+	int MRMI_Request(Client c, String args) throws UnknownHostException, IOException {
+		String equationAnswer;
+
+		int porta = 5000;
+		String servidor = "localhost";
+
+		Socket clientSocket = new Socket(servidor, porta);
+		
+		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		
+		outToServer.writeBytes(args + '\n');
+		
+		Config.log("CLIENT REQUEST HANDLER: sending client " + c + " request.");
+		
+		equationAnswer = inFromServer.readLine();
+		Config.log("CLIENT REQUEST HANDLER: client " + c + " answer = " + equationAnswer + ".");
+		
+		clientSocket.close();
+
+		return Integer.parseInt(equationAnswer);
 	}
 	
 	
@@ -111,8 +154,8 @@ public class ClientRequestHandler {
 	public static void main(String[] args) throws InterruptedException, IOException {
 		
 		long total = 0;
-		int it = 50000;
-		ClientRequestHandler crh = new ClientRequestHandler();
+		int it = 500;
+		ClientRequestHandler crh = ClientRequestHandler.GetInstance();
 		for(int i = 0; i < it; i++) {
 			Client client = new Client(crh);
 			start = System.nanoTime();

@@ -47,8 +47,10 @@ public class Client{
 
 	public int Solve() throws IOException {
 		Config.log(ID + ": can you solve " + equation() + " for me?");
-		answer = CRH.SendRequest(this, GetArgs());
-		return answer;
+		//answer = CRH.SendRequest(this, GetArgs());
+		//return answer;
+		
+		return ClientProxy.ServeClient(this);
 	}
 	
 	public void Thank() {
